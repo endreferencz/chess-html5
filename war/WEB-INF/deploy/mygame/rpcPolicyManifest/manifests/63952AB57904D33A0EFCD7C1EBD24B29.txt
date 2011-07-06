@@ -1,0 +1,2 @@
+serviceClass: hu.mygame.client.rpc.ChessGameService
+path: DD3B0F84F0057E0111B9C0F8FB583857.gwt.rpc
