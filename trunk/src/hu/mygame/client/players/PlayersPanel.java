@@ -83,7 +83,7 @@ public class PlayersPanel extends Composite implements AsyncCallback<List<Player
 		sinkEvents(Event.MOUSEEVENTS);
 		chessGameService.getPlayers(this);
 	}
-
+ 
 	@Override
 	public void onBrowserEvent(Event event) {
 		switch (DOM.eventGetType(event)) {
