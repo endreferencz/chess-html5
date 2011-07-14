@@ -1,10 +1,9 @@
 package hu.mygame.client.rpc;
 
 import hu.mygame.shared.Board;
-import hu.mygame.shared.Position;
-import hu.mygame.shared.PromotionPiece;
 import hu.mygame.shared.SharedInvitation;
 import hu.mygame.shared.jdo.Player;
+import hu.mygame.shared.moves.Move;
 
 import java.util.List;
 
@@ -26,8 +25,7 @@ public interface ChessGameServiceAsync {
 
 	void invite(String userId, AsyncCallback<Void> callback);
 
-	void move(Long gameId, Position position, Position target, PromotionPiece promotionPiece,
-			AsyncCallback<Boolean> callback);
+	void move(Long gameId, Move move, AsyncCallback<Boolean> callback);
 
 	void startGame(AsyncCallback<Void> callback);
 

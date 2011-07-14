@@ -16,7 +16,6 @@
 		}
 	</ui:style>
 	<g:VerticalPanel addStyleNames="{style.leftpanel}">
-		<g:Label text="Players:" />
 		<g:VerticalPanel ui:field="verticalPanel">
 		</g:VerticalPanel>
 	</g:VerticalPanel>

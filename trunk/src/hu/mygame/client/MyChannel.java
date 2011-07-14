@@ -11,11 +11,9 @@ import com.google.gwt.appengine.channel.client.SocketListener;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public class MyChannel implements AsyncCallback<String>, SocketListener,
-		ChannelCreatedCallback {
+public class MyChannel implements AsyncCallback<String>, SocketListener, ChannelCreatedCallback {
 
-	private ChessGameServiceAsync chessGameService = GWT
-			.create(ChessGameService.class);
+	private ChessGameServiceAsync chessGameService = GWT.create(ChessGameService.class);
 	private Main main;
 	private boolean open = false;
 

@@ -4,11 +4,11 @@
 	xmlns:m="urn:import:hu.mygame.client.players">
 	<ui:style>
 		.important {
-		font-weight: bold;
+			font-weight: bold;
 		}
-
+		
 		.backg {
-		background-color: #EEEEEE;
+			background-color: #EEEEEE;
 		}
 	</ui:style>
 	<ui:with field='res' type='hu.mygame.client.resources.Resources' />
@@ -23,7 +23,7 @@
 				<g:Button text="New Game" ui:field="startButton" width="200px" />
 				<g:Label addStyleNames="{style.important}" ui:field="statusLabel"
 					text="" />
-				<m:PlayersPanel />
+				<m:PlayersPanel ui:field="playersPanel" />
 			</g:VerticalPanel>
 		</g:west>
 		<g:center>

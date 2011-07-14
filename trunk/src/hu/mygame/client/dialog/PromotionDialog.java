@@ -1,8 +1,9 @@
 package hu.mygame.client.dialog;
 
 import hu.mygame.client.chessboard.ActionHandler;
-import hu.mygame.shared.Position;
 import hu.mygame.shared.PromotionPiece;
+import hu.mygame.shared.exceptions.IllegalOperationException;
+import hu.mygame.shared.moves.Move;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,14 +36,11 @@ public class PromotionDialog extends DialogBox {
 	@UiField
 	Label label;
 
-	private Position selected = null;
+	private Move move = null;
 
-	private Position target = null;
-
-	public PromotionDialog(Position selected, Position target, ActionHandler actionHandler) {
+	public PromotionDialog(Move move, ActionHandler actionHandler) {
 		setWidget(uiBinder.createAndBindUi(this));
-		this.selected = selected;
-		this.target = target;
+		this.move = move;
 		this.actionHandler = actionHandler;
 		dialog.setPopupPositionAndShow(new PositionCallback() {
 			@Override
@@ -56,21 +54,41 @@ public class PromotionDialog extends DialogBox {
 	@UiHandler("button_bishop")
 	void onBishop(ClickEvent e) {
 		dialog.hide();
-		actionHandler.makeMove(selected, target, PromotionPiece.BISHOP);
+		try {
+			move.setPromotionPiece(PromotionPiece.BISHOP);
+			actionHandler.makeMove(move);
+		} catch (IllegalOperationException e1) {
+			// TODO
+		}
 	}
 	@UiHandler("button_knight")
 	void onKnight(ClickEvent e) {
 		dialog.hide();
-		actionHandler.makeMove(selected, target, PromotionPiece.KNIGHT);
+		try {
+			move.setPromotionPiece(PromotionPiece.KNIGHT);
+			actionHandler.makeMove(move);
+		} catch (IllegalOperationException e1) {
+			// TODO
+		}
 	}
 	@UiHandler("button_queen")
 	void onQueen(ClickEvent e) {
 		dialog.hide();
-		actionHandler.makeMove(selected, target, PromotionPiece.QUEEN);
+		try {
+			move.setPromotionPiece(PromotionPiece.QUEEN);
+			actionHandler.makeMove(move);
+		} catch (IllegalOperationException e1) {
+			// TODO
+		}
 	}
 	@UiHandler("button_rook")
 	void onRook(ClickEvent e) {
 		dialog.hide();
-		actionHandler.makeMove(selected, target, PromotionPiece.ROOK);
+		try {
+			move.setPromotionPiece(PromotionPiece.ROOK);
+			actionHandler.makeMove(move);
+		} catch (IllegalOperationException e1) {
+			// TODO
+		}
 	}
 }

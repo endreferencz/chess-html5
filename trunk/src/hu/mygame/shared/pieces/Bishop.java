@@ -1,6 +1,5 @@
 package hu.mygame.shared.pieces;
 
-import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
 
 import java.util.ArrayList;
@@ -15,8 +14,8 @@ public class Bishop extends Piece {
 	public Bishop() {
 
 	}
-	public Bishop(Position position, boolean white, Board board) {
-		super(position, white, board);
+	public Bishop(Position position, boolean white) {
+		super(position, white);
 	}
 	@Override
 	public ArrayList<ArrayList<Position>> getDeltas() {

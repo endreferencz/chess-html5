@@ -3,6 +3,7 @@ package hu.mygame.client.chessboard;
 import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
 import hu.mygame.shared.Side;
+import hu.mygame.shared.moves.Move;
 import hu.mygame.shared.pieces.Piece;
 
 import java.util.ArrayList;
@@ -59,12 +60,13 @@ public class BoardDrawer {
 		context.restore();
 	}
 
-	public void highlite(ArrayList<Position> positions, Board board) {
+	public void highlite(ArrayList<Move> positions, Board board) {
 		if (!lastHighlite.equals(positions)) {
 			drawTable(board);
 			context.save();
 			context.setFillStyle(highlite);
-			for (Position p : positions) {
+			for (Move m : positions) {
+				Position p = m.getHighlitePosition();
 				if (board.getSide() == Side.WHITE)
 					context.fillRect(p.getColumn() * width, (7 - p.getRow()) * height, width, height);
 				else

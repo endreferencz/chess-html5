@@ -3,7 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:style>
 		.important {
-		font-weight: bold;
+			font-weight: bold;
 		}
 	</ui:style>
 	<g:PopupPanel width="200px">
@@ -13,6 +13,7 @@
 			<g:HorizontalPanel>
 				<g:Button ui:field="inviteButton" width="50px" text="Invite" />
 				<g:Label ui:field="invitationState" />
+				<g:Label ui:field="onlineState" />
 			</g:HorizontalPanel>
 		</g:VerticalPanel>
 	</g:PopupPanel>

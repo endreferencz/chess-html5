@@ -1,6 +1,5 @@
 package hu.mygame.shared.pieces;
 
-import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
 
 import java.util.ArrayList;
@@ -21,12 +20,12 @@ public class Pawn extends Piece {
 	public Pawn() {
 	}
 
-	public Pawn(Position position, boolean white, Board board) {
-		super(position, white, board);
+	public Pawn(Position position, boolean white) {
+		super(position, white);
 	}
 	@Override
-	public boolean enPassant() {
-		if (board.getStep() != (movedStep + 1)) {
+	public boolean enPassant(int step) {
+		if (step != (movedStep + 1)) {
 			return false;
 		}
 		if (moved != 1) {

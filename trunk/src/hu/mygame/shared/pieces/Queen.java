@@ -1,6 +1,5 @@
 package hu.mygame.shared.pieces;
 
-import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
 
 import java.util.ArrayList;
@@ -15,8 +14,8 @@ public class Queen extends Piece {
 	public Queen() {
 	}
 
-	public Queen(Position position, boolean white, Board board) {
-		super(position, white, board);
+	public Queen(Position position, boolean white) {
+		super(position, white);
 	}
 
 	@Override

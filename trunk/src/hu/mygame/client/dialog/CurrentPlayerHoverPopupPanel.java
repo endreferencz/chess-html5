@@ -9,8 +9,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
@@ -37,27 +35,11 @@ public class CurrentPlayerHoverPopupPanel extends PopupPanel implements AsyncCal
 
 	public CurrentPlayerHoverPopupPanel(Player player) {
 		setWidget(uiBinder.createAndBindUi(this));
-		sinkEvents(Event.MOUSEEVENTS);
 		setAutoHideEnabled(true);
 		if (player.getName() != null) {
 			nameTextBox.setText(player.getName());
 		}
 		scoreLabel.setText(player.getWin() + " - " + player.getDraw() + " - " + player.getLost());
-	}
-	@Override
-	public void onBrowserEvent(Event event) {
-		switch (DOM.eventGetType(event)) {
-			case Event.ONMOUSEOUT :
-				int x = event.getClientX();
-				int y = event.getClientY();
-				if ((x < getPopupLeft())
-						|| (x > (getPopupLeft() + getOffsetWidth()) || (y < getPopupTop()) || (y > (getPopupTop() + getOffsetHeight())))) {
-					hide();
-				}
-				break;
-			default :
-				super.onBrowserEvent(event);
-		}
 	}
 
 	@UiHandler("nameButton")

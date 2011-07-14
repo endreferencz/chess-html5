@@ -9,11 +9,114 @@ import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable
 public class Player implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	@Persistent
+	private long draw;
+	@Persistent
+	private String email;
+	@NotPersistent
+	private boolean invited = false;
+	@Persistent
+	private long lost;
+	@Persistent
+	private String name;
+	@PrimaryKey
+	private String user;
+	@Persistent
+	private boolean waiting;
+	@Persistent
+	private boolean online;
+	@Persistent
+	private long win;
+	public Player(long draw, String email, boolean invited, long lost, String name, String user, boolean waiting,
+			boolean online, long win) {
+		super();
+		this.draw = draw;
+		this.email = email;
+		this.invited = invited;
+		this.lost = lost;
+		this.name = name;
+		this.user = user;
+		this.waiting = waiting;
+		this.online = online;
+		this.win = win;
+	}
+	public long getDraw() {
+		return draw;
+	}
+	public void setDraw(long draw) {
+		this.draw = draw;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public boolean isInvited() {
+		return invited;
+	}
+	public void setInvited(boolean invited) {
+		this.invited = invited;
+	}
+	public long getLost() {
+		return lost;
+	}
+	public void setLost(long lost) {
+		this.lost = lost;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getUser() {
+		return user;
+	}
+	public void setUser(String user) {
+		this.user = user;
+	}
+	public boolean isWaiting() {
+		return waiting;
+	}
+	public void setWaiting(boolean waiting) {
+		this.waiting = waiting;
+	}
+	public boolean isOnline() {
+		return online;
+	}
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+	public long getWin() {
+		return win;
+	}
+	public void setWin(long win) {
+		this.win = win;
+	}
+
+	public String getDisplayName() {
+		if (name != null) {
+			return name;
+		} else {
+			return email;
+		}
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (int) (draw ^ (draw >>> 32));
+		result = prime * result + ((email == null) ? 0 : email.hashCode());
+		result = prime * result + (invited ? 1231 : 1237);
+		result = prime * result + (int) (lost ^ (lost >>> 32));
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + (online ? 1231 : 1237);
 		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		result = prime * result + (waiting ? 1231 : 1237);
+		result = prime * result + (int) (win ^ (win >>> 32));
 		return result;
 	}
 	@Override
@@ -25,93 +128,38 @@ public class Player implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Player other = (Player) obj;
+		if (draw != other.draw)
+			return false;
+		if (email == null) {
+			if (other.email != null)
+				return false;
+		} else if (!email.equals(other.email))
+			return false;
+		if (invited != other.invited)
+			return false;
+		if (lost != other.lost)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (online != other.online)
+			return false;
 		if (user == null) {
 			if (other.user != null)
 				return false;
 		} else if (!user.equals(other.user))
 			return false;
+		if (waiting != other.waiting)
+			return false;
+		if (win != other.win)
+			return false;
 		return true;
 	}
-	private static final long serialVersionUID = 1L;
-	@Persistent
-	private Long draw;
-	@Persistent
-	private String email;
-	@NotPersistent
-	private boolean invited = false;
-	@Persistent
-	private Long lost;
-	@Persistent
-	private String name;
-	@PrimaryKey
-	private String user;
-	@Persistent
-	private Boolean waiting;
-
-	@Persistent
-	private Long win;
 
 	public Player() {
-	}
-	public Player(String user, String email, String name, Long win, Long draw, Long lost, Boolean waiting) {
-		super();
-		this.user = user;
-		this.email = email;
-		this.setName(name);
-		this.win = win;
-		this.draw = draw;
-		this.lost = lost;
-		this.waiting = waiting;
+
 	}
 
-	public Long getDraw() {
-		return draw;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public Boolean getInvited() {
-		return invited;
-	}
-	public Long getLost() {
-		return lost;
-	}
-	public String getName() {
-		return name;
-	}
-	public String getUser() {
-		return user;
-	}
-	public Boolean getWaiting() {
-		return waiting;
-	}
-	public Long getWin() {
-		return win;
-	}
-
-	public void setDraw(Long draw) {
-		this.draw = draw;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public void setInvited(Boolean invited) {
-		this.invited = invited;
-	}
-	public void setLost(Long lost) {
-		this.lost = lost;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public void setUser(String user) {
-		this.user = user;
-	}
-	public void setWaiting(Boolean waiting) {
-		this.waiting = waiting;
-	}
-	public void setWin(Long win) {
-		this.win = win;
-	}
 }
