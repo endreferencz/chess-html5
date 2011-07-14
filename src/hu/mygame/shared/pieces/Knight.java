@@ -1,6 +1,5 @@
 package hu.mygame.shared.pieces;
 
-import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
 
 import java.util.ArrayList;
@@ -16,8 +15,8 @@ public class Knight extends Piece {
 	public Knight() {
 	}
 
-	public Knight(Position position, boolean white, Board board) {
-		super(position, white, board);
+	public Knight(Position position, boolean white) {
+		super(position, white);
 	}
 	@Override
 	public ArrayList<ArrayList<Position>> getDeltas() {

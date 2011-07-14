@@ -1,5 +1,6 @@
 package hu.mygame.shared;
 
+import hu.mygame.shared.moves.Move;
 import hu.mygame.shared.pieces.Bishop;
 import hu.mygame.shared.pieces.King;
 import hu.mygame.shared.pieces.Knight;
@@ -15,6 +16,8 @@ import java.util.List;
 public class Board implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	private String whitePlayer = null;
+	private String blackPlayer = null;
 	protected ArrayList<Piece> pieces = new ArrayList<Piece>();
 	protected Piece redoPiece = null;
 	protected Position redoPosition = new Position();
@@ -28,31 +31,31 @@ public class Board implements Serializable {
 
 	public Board(boolean init) {
 		if (init) {
-			pieces.add(new Rook(new Position(0, 0), true, this));
-			pieces.add(new Knight(new Position(0, 1), true, this));
-			pieces.add(new Bishop(new Position(0, 2), true, this));
-			pieces.add(new Queen(new Position(0, 3), true, this));
-			pieces.add(new King(new Position(0, 4), true, this));
-			pieces.add(new Bishop(new Position(0, 5), true, this));
-			pieces.add(new Knight(new Position(0, 6), true, this));
-			pieces.add(new Rook(new Position(0, 7), true, this));
+			pieces.add(new Rook(new Position(0, 0), true));
+			pieces.add(new Knight(new Position(0, 1), true));
+			pieces.add(new Bishop(new Position(0, 2), true));
+			pieces.add(new Queen(new Position(0, 3), true));
+			pieces.add(new King(new Position(0, 4), true));
+			pieces.add(new Bishop(new Position(0, 5), true));
+			pieces.add(new Knight(new Position(0, 6), true));
+			pieces.add(new Rook(new Position(0, 7), true));
 
 			for (int i = 0; i < 8; i++) {
-				pieces.add(new Pawn(new Position(1, i), true, this));
+				pieces.add(new Pawn(new Position(1, i), true));
 			}
 
 			for (int i = 0; i < 8; i++) {
-				pieces.add(new Pawn(new Position(6, i), false, this));
+				pieces.add(new Pawn(new Position(6, i), false));
 			}
 
-			pieces.add(new Rook(new Position(7, 0), false, this));
-			pieces.add(new Knight(new Position(7, 1), false, this));
-			pieces.add(new Bishop(new Position(7, 2), false, this));
-			pieces.add(new Queen(new Position(7, 3), false, this));
-			pieces.add(new King(new Position(7, 4), false, this));
-			pieces.add(new Bishop(new Position(7, 5), false, this));
-			pieces.add(new Knight(new Position(7, 6), false, this));
-			pieces.add(new Rook(new Position(7, 7), false, this));
+			pieces.add(new Rook(new Position(7, 0), false));
+			pieces.add(new Knight(new Position(7, 1), false));
+			pieces.add(new Bishop(new Position(7, 2), false));
+			pieces.add(new Queen(new Position(7, 3), false));
+			pieces.add(new King(new Position(7, 4), false));
+			pieces.add(new Bishop(new Position(7, 5), false));
+			pieces.add(new Knight(new Position(7, 6), false));
+			pieces.add(new Rook(new Position(7, 7), false));
 		}
 	}
 
@@ -72,15 +75,15 @@ public class Board implements Serializable {
 		return (getPiece(position) == null);
 	}
 
-	public ArrayList<Position> getAvailableMoves(Piece piece) {
+	public ArrayList<Move> getAvailableMoves(Piece piece) {
 		if (piece == null) {
 			return null;
 		} else {
-			return piece.getAvailableMoves();
+			return piece.getAvailableMoves(this);
 		}
 	}
 
-	public ArrayList<Position> getAvailableMoves(Position position) {
+	public ArrayList<Move> getAvailableMoves(Position position) {
 		Piece piece = getPiece(position);
 		if (piece != null) {
 			if ((piece.isWhite() && side == Side.WHITE) || (piece.isBlack() && side == Side.BLACK)) {
@@ -177,7 +180,7 @@ public class Board implements Serializable {
 	}
 
 	boolean isStaleMate(King king) {
-		List<Position> available = king.getAvailableMoves();
+		List<Move> available = king.getAvailableMoves(this);
 		if (available != null)
 			return false;
 		List<Piece> copy = new ArrayList<Piece>();
@@ -186,7 +189,7 @@ public class Board implements Serializable {
 		}
 		for (Piece p : copy) {
 			if (p.isWhite() == king.isWhite()) {
-				available = p.getAvailableMoves();
+				available = p.getAvailableMoves(this);
 				if (available != null)
 					return false;
 			}
@@ -194,105 +197,28 @@ public class Board implements Serializable {
 		return true;
 	}
 
-	public PromotionPiece movePiece(Position selected, Position target) {
-		return movePiece(selected, target, null);
-	}
-
-	public PromotionPiece movePiece(Position selected, Position target, PromotionPiece promotionPiece) {
+	public void movePiece(Move move) {
 		// TODO ELLENORZES
 
-		Piece piece = getPiece(selected);
-
-		if (piece == null) {
-			return null;
-		}
-
-		if (piece.isPawn() && ((target.getRow() == 0) || (target.getRow() == 7))) {
-			if (promotionPiece == null) {
-				promote(selected, target);
-				return PromotionPiece.REPEAT;
-			}
-		}
+		Piece piece = getPiece(move.getFrom());
 
 		if (piece.isWhite()) {
 			if (state == State.WHITE_TURN || state == State.WHITE_TURN_CHESS) {
 				state = State.BLACK_TURN;
 			} else {
-				return null;
+				return;
 			}
 		} else {
 			if (state == State.BLACK_TURN || state == State.BLACK_TURN_CHESS) {
 				state = State.WHITE_TURN;
 			} else {
-				return null;
+				return;
 			}
 		}
 
 		piece.makeMoved(step);
 		step++;
-		if (piece.isKing() && target.getColumn() == 6 && target.getRow() == 0) {
-			piece.getPosition().setColumn(6);
-			piece.getPosition().setRow(0);
-			Piece rook = getPiece(new Position(0, 7));
-			rook.getPosition().setColumn(5);
-			rook.getPosition().setRow(0);
-		} else if (piece.isKing() && target.getColumn() == 2 && target.getRow() == 0) {
-			piece.getPosition().setColumn(2);
-			piece.getPosition().setRow(0);
-			Piece rook = getPiece(new Position(0, 0));
-			rook.getPosition().setColumn(3);
-			rook.getPosition().setRow(0);
-		} else if (piece.isKing() && target.getColumn() == 6 && target.getRow() == 7) {
-			piece.getPosition().setColumn(6);
-			piece.getPosition().setRow(7);
-			Piece rook = getPiece(new Position(7, 7));
-			rook.getPosition().setColumn(5);
-			rook.getPosition().setRow(7);
-		} else if (piece.isKing() && target.getColumn() == 2 && target.getRow() == 7) {
-			piece.getPosition().setColumn(2);
-			piece.getPosition().setRow(7);
-			Piece rook = getPiece(new Position(7, 0));
-			rook.getPosition().setColumn(3);
-			rook.getPosition().setRow(7);
-		} else {
-			Piece targetPiece = getPiece(target);
-			// en passant
-			if (piece.isPawn() && (target.getColumn() != piece.getPosition().getColumn()) && (targetPiece == null)) {
-				if (piece.isWhite()) {
-					targetPiece = getPiece(new Position(target.getRow() - 1, target.getColumn()));
-				} else {
-					targetPiece = getPiece(new Position(target.getRow() + 1, target.getColumn()));
-				}
-			}
-			remove(targetPiece);
-			piece.getPosition().setColumn(target.getColumn());
-			piece.getPosition().setRow(target.getRow());
-		}
-
-		// promotion
-		if (piece.isPawn() && ((piece.getPosition().getRow() == 0) || (piece.getPosition().getRow() == 7))) {
-			if (promotionPiece != null) {
-				Piece newPiece = null;
-				switch (promotionPiece) {
-					case QUEEN :
-						newPiece = new Queen(piece.getPosition(), piece.isWhite(), this);
-						break;
-					case ROOK :
-						newPiece = new Rook(piece.getPosition(), piece.isWhite(), this);
-						break;
-					case KNIGHT :
-						newPiece = new Knight(piece.getPosition(), piece.isWhite(), this);
-						break;
-					case BISHOP :
-						newPiece = new Bishop(piece.getPosition(), piece.isWhite(), this);
-						break;
-				}
-				remove(piece);
-				add(newPiece);
-			} else {
-				// ERROR
-			}
-		}
+		move.makeMove(this);
 
 		Boolean white;
 		if (state == State.BLACK_TURN) {
@@ -306,31 +232,31 @@ public class Board implements Serializable {
 			if (white) {
 				if (isStaleMate(king)) {
 					state = State.BLACK_WIN;
-					return promotionPiece;
+					return;
 				} else {
 					state = State.WHITE_TURN_CHESS;
-					return promotionPiece;
+					return;
 				}
 			} else {
 				if (isStaleMate(king)) {
 					state = State.WHITE_WIN;
-					return promotionPiece;
+					return;
 				} else {
 					state = State.BLACK_TURN_CHESS;
-					return promotionPiece;
+					return;
 				}
 			}
 		}
 		if ((pieces.size() == 2) || isStaleMate(king)) {
 			state = State.DRAW;
-			return promotionPiece;
+			return;
 		}
 
 		if (pieces.size() == 3) {
 			for (Piece p : pieces) {
 				if (p.isBishop() || p.isKnight()) {
 					state = State.DRAW;
-					return promotionPiece;
+					return;
 				}
 			}
 		}
@@ -339,7 +265,7 @@ public class Board implements Serializable {
 			Position pos2 = null;
 			for (Piece p : pieces) {
 				if (!(p.isBishop() || p.isKing())) {
-					return promotionPiece;
+					return;
 				} else if (p.isBishop()) {
 					if (pos1 != null) {
 						pos2 = p.getPosition();
@@ -350,10 +276,10 @@ public class Board implements Serializable {
 			}
 			if (((pos1.getColumn() + pos1.getRow()) % 2) == ((pos2.getColumn() + pos2.getRow()) % 2)) {
 				state = State.DRAW;
-				return promotionPiece;
+				return;
 			}
 		}
-		return promotionPiece;
+		return;
 	}
 
 	public void moveWithUndo(Piece piece, Position target) {
@@ -391,5 +317,21 @@ public class Board implements Serializable {
 			redoPiece = null;
 			savedPiece = null;
 		}
+	}
+
+	public void setWhitePlayer(String whitePlayer) {
+		this.whitePlayer = whitePlayer;
+	}
+
+	public String getWhitePlayer() {
+		return whitePlayer;
+	}
+
+	public void setBlackPlayer(String blackPlayer) {
+		this.blackPlayer = blackPlayer;
+	}
+
+	public String getBlackPlayer() {
+		return blackPlayer;
 	}
 }

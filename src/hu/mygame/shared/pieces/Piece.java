@@ -2,6 +2,12 @@ package hu.mygame.shared.pieces;
 
 import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
+import hu.mygame.shared.moves.AttackMove;
+import hu.mygame.shared.moves.AttackMoveWithPromotion;
+import hu.mygame.shared.moves.CastleMove;
+import hu.mygame.shared.moves.Move;
+import hu.mygame.shared.moves.SimpleMove;
+import hu.mygame.shared.moves.SimpleMoveWithPromotion;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -37,7 +43,7 @@ public abstract class Piece implements Serializable {
 			return allDeltasBlack;
 		}
 	}
-	protected Board board;
+
 	protected int moved = 0;
 	protected int movedStep = -1;
 	protected Position position;
@@ -45,12 +51,11 @@ public abstract class Piece implements Serializable {
 	protected boolean white;
 	public Piece() {
 	}
-	public Piece(Position position, boolean white, Board board) {
+	public Piece(Position position, boolean white) {
 		this.position = position;
 		this.white = white;
-		this.setBoard(board);
 	}
-	public boolean enPassant() {
+	public boolean enPassant(int step) {
 		return false;
 	}
 
@@ -58,8 +63,8 @@ public abstract class Piece implements Serializable {
 		return getDeltas();
 	}
 
-	public ArrayList<Position> getAvailableMoves() {
-		ArrayList<Position> ret = new ArrayList<Position>();
+	public ArrayList<Move> getAvailableMoves(Board board) {
+		ArrayList<Move> ret = new ArrayList<Move>();
 		Position temp = new Position();
 		King king = board.getKing(isWhite());
 
@@ -72,8 +77,14 @@ public abstract class Piece implements Serializable {
 					if (piece == null) {
 						board.moveWithUndo(this, temp);
 						if (!board.isPositionAttackedBy(king.getPosition(), !isWhite())) {
-							ret.add(new Position(temp.getRow(), temp.getColumn()));
-
+							Move move;
+							if (isPawn() && (temp.getRow() == 0 || temp.getRow() == 7)) {
+								move = new SimpleMoveWithPromotion(this.getPosition(), new Position(temp.getRow(),
+										temp.getColumn()), null);
+							} else {
+								move = new SimpleMove(this.getPosition(), new Position(temp.getRow(), temp.getColumn()));
+							}
+							ret.add(move);
 						}
 						board.undo();
 					}
@@ -93,8 +104,14 @@ public abstract class Piece implements Serializable {
 					if ((piece != null) && (piece.isWhite() != isWhite())) {
 						board.moveWithUndo(this, temp);
 						if (!board.isPositionAttackedBy(king.getPosition(), !isWhite())) {
-							ret.add(new Position(temp.getRow(), temp.getColumn()));
-
+							Move move;
+							if (isPawn() && (temp.getRow() == 0 || temp.getRow() == 7)) {
+								move = new AttackMoveWithPromotion(this.getPosition(), new Position(temp.getRow(),
+										temp.getColumn()), null);
+							} else {
+								move = new AttackMove(this.getPosition(), new Position(temp.getRow(), temp.getColumn()));
+							}
+							ret.add(move);
 						}
 						board.undo();
 					}
@@ -112,26 +129,34 @@ public abstract class Piece implements Serializable {
 				if (piece != null && piece.isRookAndNotMoved() && board.free(0, 5) && board.free(0, 6)
 						&& !board.isPositionAttackedBy(new Position(0, 5), !white)
 						&& !board.isPositionAttackedBy(new Position(0, 6), !white)) {
-					ret.add(new Position(0, 6));
+					Move move = new CastleMove(this.getPosition(), new Position(0, 6), piece.getPosition(),
+							new Position(0, 5));
+					ret.add(move);
 				}
 				piece = board.getPiece(new Position(0, 0));
 				if (piece != null && piece.isRookAndNotMoved() && board.free(0, 1) && board.free(0, 2)
 						&& board.free(0, 3) && !board.isPositionAttackedBy(new Position(0, 2), !white)
 						&& !board.isPositionAttackedBy(new Position(0, 3), !white)) {
-					ret.add(new Position(0, 2));
+					Move move = new CastleMove(this.getPosition(), new Position(0, 2), piece.getPosition(),
+							new Position(0, 3));
+					ret.add(move);
 				}
 			} else {
 				Piece piece = board.getPiece(new Position(7, 7));
 				if (piece != null && piece.isRookAndNotMoved() && board.free(7, 5) && board.free(7, 6)
 						&& !board.isPositionAttackedBy(new Position(7, 5), !white)
 						&& !board.isPositionAttackedBy(new Position(7, 6), !white)) {
-					ret.add(new Position(7, 6));
+					Move move = new CastleMove(this.getPosition(), new Position(7, 6), piece.getPosition(),
+							new Position(7, 5));
+					ret.add(move);
 				}
 				piece = board.getPiece(new Position(7, 0));
 				if (piece != null && piece.isRookAndNotMoved() && board.free(7, 1) && board.free(7, 2)
 						&& board.free(7, 3) && !board.isPositionAttackedBy(new Position(7, 2), !white)
 						&& !board.isPositionAttackedBy(new Position(7, 3), !white)) {
-					ret.add(new Position(7, 2));
+					Move move = new CastleMove(this.getPosition(), new Position(7, 2), piece.getPosition(),
+							new Position(7, 3));
+					ret.add(move);
 				}
 			}
 		}
@@ -140,19 +165,27 @@ public abstract class Piece implements Serializable {
 		// TODO nem kerul sakkba a kiraly?!
 		if (isPawn()) {
 			Piece piece = board.getPiece(new Position(position.getRow(), position.getColumn() - 1));
-			if ((piece != null) && (piece.isWhite() != isWhite()) && piece.enPassant()) {
+			if ((piece != null) && (piece.isWhite() != isWhite()) && piece.enPassant(board.getStep())) {
 				if (isWhite()) {
-					ret.add(new Position(position.getRow() + 1, position.getColumn() - 1));
+					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() + 1,
+							position.getColumn() - 1));
+					ret.add(move);
 				} else {
-					ret.add(new Position(position.getRow() - 1, position.getColumn() - 1));
+					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() - 1,
+							position.getColumn() - 1));
+					ret.add(move);
 				}
 			}
 			piece = board.getPiece(new Position(position.getRow(), position.getColumn() + 1));
-			if ((piece != null) && (piece.isWhite() != isWhite()) && piece.enPassant()) {
+			if ((piece != null) && (piece.isWhite() != isWhite()) && piece.enPassant(board.getStep())) {
 				if (isWhite()) {
-					ret.add(new Position(position.getRow() + 1, position.getColumn() + 1));
+					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() + 1,
+							position.getColumn() + 1));
+					ret.add(move);
 				} else {
-					ret.add(new Position(position.getRow() - 1, position.getColumn() + 1));
+					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() - 1,
+							position.getColumn() + 1));
+					ret.add(move);
 				}
 			}
 		}
@@ -161,10 +194,6 @@ public abstract class Piece implements Serializable {
 			return null;
 		else
 			return ret;
-	}
-
-	public Board getBoard() {
-		return board;
 	}
 
 	public abstract ArrayList<ArrayList<Position>> getDeltas();
@@ -207,10 +236,6 @@ public abstract class Piece implements Serializable {
 	public void makeMoved(int step) {
 		moved++;
 		this.movedStep = step;
-	}
-
-	public void setBoard(Board board) {
-		this.board = board;
 	}
 
 	public void setPosition(Position position) {

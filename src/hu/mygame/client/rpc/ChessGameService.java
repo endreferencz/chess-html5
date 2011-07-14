@@ -1,10 +1,9 @@
 package hu.mygame.client.rpc;
 
 import hu.mygame.shared.Board;
-import hu.mygame.shared.Position;
-import hu.mygame.shared.PromotionPiece;
 import hu.mygame.shared.SharedInvitation;
 import hu.mygame.shared.jdo.Player;
+import hu.mygame.shared.moves.Move;
 
 import java.util.List;
 
@@ -14,11 +13,13 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("chessGame")
 public interface ChessGameService extends RemoteService {
 
-	public static String INVITATION = "2:";
-	public static String REFRESH_BOARD = "1:";
+	public static String INVITATION = "1:";
+	public static String REFRESH_BOARD = "2:";
+	public static String PLAYER_WENT_ONLINE = "3:";
+	public static String PLAYER_WENT_OFFLINE = "4:";
 
 	public void changeName(String name);
-	
+
 	/**
 	 * At startup for channel connection.
 	 * 
@@ -48,7 +49,7 @@ public interface ChessGameService extends RemoteService {
 
 	public void invite(String userId);
 
-	public boolean move(Long gameId, Position position, Position target, PromotionPiece promotionPiece);
+	public boolean move(Long gameId, Move move);
 
 	public void startGame();
 

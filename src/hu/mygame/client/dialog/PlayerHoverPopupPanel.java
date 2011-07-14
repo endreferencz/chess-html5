@@ -9,8 +9,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
@@ -28,6 +26,9 @@ public class PlayerHoverPopupPanel extends PopupPanel implements AsyncCallback<V
 	Label invitationState;
 
 	@UiField
+	Label onlineState;
+
+	@UiField
 	Button inviteButton;
 
 	private Player player = null;
@@ -40,35 +41,19 @@ public class PlayerHoverPopupPanel extends PopupPanel implements AsyncCallback<V
 
 	public PlayerHoverPopupPanel(Player player) {
 		setWidget(uiBinder.createAndBindUi(this));
-		sinkEvents(Event.MOUSEEVENTS);
 		setAutoHideEnabled(true);
 		this.player = player;
-		if (player.getName() == null) {
-			playerName.setText(player.getEmail());
-		} else {
+		if (player.getName() != null) {
 			playerName.setText(player.getName());
+		} else {
+			playerName.setText(player.getEmail());
 		}
-		if (player.getInvited()) {
+		if (player.isInvited()) {
 			invitationState.setText("invited");
 		} else {
 			invitationState.setText("");
 		}
 		score.setText(player.getWin() + " - " + player.getDraw() + " - " + player.getLost());
-	}
-	@Override
-	public void onBrowserEvent(Event event) {
-		switch (DOM.eventGetType(event)) {
-			case Event.ONMOUSEOUT :
-				int x = event.getClientX();
-				int y = event.getClientY();
-				if ((x < getPopupLeft())
-						|| (x > (getPopupLeft() + getOffsetWidth()) || (y < getPopupTop()) || (y > (getPopupTop() + getOffsetHeight())))) {
-					hide();
-				}
-				break;
-			default :
-				super.onBrowserEvent(event);
-		}
 	}
 
 	@Override

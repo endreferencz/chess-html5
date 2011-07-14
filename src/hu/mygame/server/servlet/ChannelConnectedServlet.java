@@ -3,6 +3,7 @@ package hu.mygame.server.servlet;
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.server.PMF;
 import hu.mygame.server.jdo.Game;
+import hu.mygame.shared.jdo.Player;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,8 +33,17 @@ public class ChannelConnectedServlet extends HttpServlet {
 		String clientId = presence.clientId();
 
 		log.info("Channel connected: " + clientId);
+		System.out.println("Channel connected: " + clientId);
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try {
+			Player player = pm.getObjectById(Player.class, clientId);
+			player.setOnline(true);
+		} finally {
+			pm.close();
+		}
+
+		pm = PMF.get().getPersistenceManager();
 		try {
 			Query query = pm.newQuery(Game.class);
 			query.setFilter("(whiteUser == userParam) && (finished == false)");
@@ -43,12 +53,21 @@ public class ChannelConnectedServlet extends HttpServlet {
 				ChannelMessage message = new ChannelMessage(clientId, ChessGameService.REFRESH_BOARD + g.getId());
 				channelService.sendMessage(message);
 			}
+
 			query = pm.newQuery(Game.class);
 			query.setFilter("(blackUser == userParam) && (finished == false)");
 			query.declareParameters("String userParam");
 			games = (List<Game>) query.execute(clientId);
 			for (Game g : games) {
 				ChannelMessage message = new ChannelMessage(clientId, ChessGameService.REFRESH_BOARD + g.getId());
+				channelService.sendMessage(message);
+			}
+
+			query = pm.newQuery(Player.class);
+			query.setFilter("online == true");
+			List<Player> players = (List<Player>) query.execute();
+			for (Player p : players) {
+				ChannelMessage message = new ChannelMessage(p.getUser(), ChessGameService.PLAYER_WENT_ONLINE + clientId);
 				channelService.sendMessage(message);
 			}
 		} finally {

@@ -82,4 +82,8 @@ public class Game implements Serializable {
 	public void setWhiteUser(String whiteUser) {
 		this.whiteUser = whiteUser;
 	}
+
+	public void notifyComingPlayer(ChannelService channelService) {
+		
+	}
 }

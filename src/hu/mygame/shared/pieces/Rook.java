@@ -1,6 +1,5 @@
 package hu.mygame.shared.pieces;
 
-import hu.mygame.shared.Board;
 import hu.mygame.shared.Position;
 
 import java.util.ArrayList;
@@ -15,8 +14,8 @@ public class Rook extends Piece {
 	public Rook() {
 
 	}
-	public Rook(Position position, boolean white, Board board) {
-		super(position, white, board);
+	public Rook(Position position, boolean white) {
+		super(position, white);
 	}
 	@Override
 	public ArrayList<ArrayList<Position>> getDeltas() {

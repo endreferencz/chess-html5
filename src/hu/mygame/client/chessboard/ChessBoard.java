@@ -2,7 +2,7 @@ package hu.mygame.client.chessboard;
 
 import hu.mygame.client.dialog.CanvasNotSupportedDialog;
 import hu.mygame.shared.Board;
-import hu.mygame.shared.Position;
+import hu.mygame.shared.moves.Move;
 
 import java.util.ArrayList;
 
@@ -47,7 +47,7 @@ public class ChessBoard extends Composite {
 		return canvas;
 	}
 
-	public void highlite(ArrayList<Position> available) {
+	public void highlite(ArrayList<Move> available) {
 		boardDrawer.highlite(available, board);
 	}
 
