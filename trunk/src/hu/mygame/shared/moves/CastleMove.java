@@ -6,7 +6,7 @@ import hu.mygame.shared.PromotionPiece;
 import hu.mygame.shared.exceptions.IllegalOperationException;
 import hu.mygame.shared.pieces.Piece;
 
-public class CastleMove implements Move {
+public class CastleMove extends Move {
 	private static final long serialVersionUID = 1L;
 	Position fromKing = null;
 	Position toKing = null;
@@ -31,9 +31,20 @@ public class CastleMove implements Move {
 	@Override
 	public void makeMove(Board board) {
 		Piece king = board.getPiece(fromKing);
+		makeMoved(king, board);
+
 		Piece rook = board.getPiece(fromRook);
 		king.setPosition(toKing);
 		rook.setPosition(toRook);
+	}
+
+	@Override
+	public void undoMove(Board board) {
+		Piece king = board.getPiece(toKing);
+		undoMakeMoved(king);
+		Piece rook = board.getPiece(toRook);
+		king.setPosition(fromKing);
+		rook.setPosition(fromRook);
 	}
 
 	@Override
@@ -49,4 +60,5 @@ public class CastleMove implements Move {
 	public Position getFrom() {
 		return fromKing;
 	}
+
 }

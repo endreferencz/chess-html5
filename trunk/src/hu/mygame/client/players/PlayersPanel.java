@@ -46,7 +46,7 @@ public class PlayersPanel extends Composite implements AsyncCallback<List<Player
 			if (player.isOnline() || currentPlayer) {
 				add(new Image("icons.png", 0, 80, 20, 20));
 			} else {
-				add(new Image("icons.png", 20, 80, 20, 20));
+				add(new Image("icons.png", 60, 80, 20, 20)); 
 			}
 			Label label = new Label(player.getEmail());
 			label.setWidth("200px");

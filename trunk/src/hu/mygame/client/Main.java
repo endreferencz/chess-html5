@@ -14,14 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -35,12 +31,6 @@ public class Main extends Composite implements AsyncCallback<List<SharedInvitati
 	private ChessGameServiceAsync chessGameService = GWT.create(ChessGameService.class);
 
 	@UiField
-	Button startButton;
-
-	@UiField
-	Label statusLabel;
-
-	@UiField
 	PlayersPanel playersPanel;
 
 	@UiField
@@ -51,19 +41,6 @@ public class Main extends Composite implements AsyncCallback<List<SharedInvitati
 		chessGameService.getMyInvitations(this);
 	}
 
-	@UiHandler("startButton")
-	void handleClick(ClickEvent e) {
-		chessGameService.startGame(new AsyncCallback<Void>() {
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-
-			@Override
-			public void onSuccess(Void result) {
-				statusLabel.setText("Waiting for opponent...");
-			}
-		});
-	}
 	@Override
 	public void onFailure(Throwable caught) {
 		// TODO

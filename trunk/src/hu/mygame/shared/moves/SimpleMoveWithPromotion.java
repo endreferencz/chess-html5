@@ -13,7 +13,7 @@ import hu.mygame.shared.pieces.Rook;
 public class SimpleMoveWithPromotion extends SimpleMove {
 	private static final long serialVersionUID = 1L;
 	protected PromotionPiece promotionPiece = null;
-
+	protected Piece promotedPiece = null;
 	public SimpleMoveWithPromotion() {
 
 	}
@@ -25,6 +25,8 @@ public class SimpleMoveWithPromotion extends SimpleMove {
 	@Override
 	public void makeMove(Board board) {
 		Piece piece = board.getPiece(from);
+		makeMoved(piece, board);
+		promotedPiece = piece;
 		board.remove(piece);
 		Piece newPiece = null;
 		switch (promotionPiece) {
@@ -43,6 +45,17 @@ public class SimpleMoveWithPromotion extends SimpleMove {
 		}
 		board.add(newPiece);
 	}
+
+	@Override
+	public void undoMove(Board board) {
+		Piece piece = board.getPiece(to);
+		board.remove(piece);
+
+		promotedPiece.setPosition(from);
+		undoMakeMoved(promotedPiece);
+		board.add(promotedPiece);
+	}
+
 	@Override
 	public void setPromotionPiece(PromotionPiece promotionPiece) throws IllegalOperationException {
 		this.promotionPiece = promotionPiece;

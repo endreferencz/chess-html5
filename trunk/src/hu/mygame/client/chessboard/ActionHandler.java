@@ -40,6 +40,7 @@ public class ActionHandler implements MouseDownHandler {
 		chessGameService.move(gameId, move, new AsyncCallback<Boolean>() {
 			@Override
 			public void onFailure(Throwable caught) {
+				// TODO
 			}
 			@Override
 			public void onSuccess(Boolean result) {

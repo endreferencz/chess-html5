@@ -109,7 +109,8 @@ public abstract class Piece implements Serializable {
 								move = new AttackMoveWithPromotion(this.getPosition(), new Position(temp.getRow(),
 										temp.getColumn()), null);
 							} else {
-								move = new AttackMove(this.getPosition(), new Position(temp.getRow(), temp.getColumn()));
+								Position to = new Position(temp.getRow(), temp.getColumn());
+								move = new AttackMove(this.getPosition(), to, to);
 							}
 							ret.add(move);
 						}
@@ -168,11 +169,11 @@ public abstract class Piece implements Serializable {
 			if ((piece != null) && (piece.isWhite() != isWhite()) && piece.enPassant(board.getStep())) {
 				if (isWhite()) {
 					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() + 1,
-							position.getColumn() - 1));
+							position.getColumn() - 1), new Position(position.getRow(), position.getColumn() - 1));
 					ret.add(move);
 				} else {
 					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() - 1,
-							position.getColumn() - 1));
+							position.getColumn() - 1), new Position(position.getRow(), position.getColumn() - 1));
 					ret.add(move);
 				}
 			}
@@ -180,11 +181,11 @@ public abstract class Piece implements Serializable {
 			if ((piece != null) && (piece.isWhite() != isWhite()) && piece.enPassant(board.getStep())) {
 				if (isWhite()) {
 					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() + 1,
-							position.getColumn() + 1));
+							position.getColumn() + 1), new Position(position.getRow(), position.getColumn() + 1));
 					ret.add(move);
 				} else {
 					Move move = new AttackMove(this.getPosition(), new Position(position.getRow() - 1,
-							position.getColumn() + 1));
+							position.getColumn() + 1), new Position(position.getRow(), position.getColumn() + 1));
 					ret.add(move);
 				}
 			}
@@ -195,7 +196,6 @@ public abstract class Piece implements Serializable {
 		else
 			return ret;
 	}
-
 	public abstract ArrayList<ArrayList<Position>> getDeltas();
 	public String getImageName() {
 		return "";
@@ -238,6 +238,18 @@ public abstract class Piece implements Serializable {
 		this.movedStep = step;
 	}
 
+	public int getMovedStep() {
+		return movedStep;
+	}
+	public void setMovedStep(int movedStep) {
+		this.movedStep = movedStep;
+	}
+	public int getMoved() {
+		return moved;
+	}
+	public void setMoved(int moved) {
+		this.moved = moved;
+	}
 	public void setPosition(Position position) {
 		this.position = position;
 	}
