@@ -6,7 +6,7 @@ import hu.mygame.shared.PromotionPiece;
 import hu.mygame.shared.exceptions.IllegalOperationException;
 import hu.mygame.shared.pieces.Piece;
 
-public class SimpleMove implements Move {
+public class SimpleMove extends Move {
 	private static final long serialVersionUID = 1L;
 	protected Position from = null;
 	protected Position to = null;
@@ -27,7 +27,15 @@ public class SimpleMove implements Move {
 	@Override
 	public void makeMove(Board board) {
 		Piece piece = board.getPiece(from);
+		makeMoved(piece, board);
 		piece.setPosition(to);
+	}
+
+	@Override
+	public void undoMove(Board board) {
+		Piece piece = board.getPiece(to);
+		undoMakeMoved(piece);
+		piece.setPosition(from);
 	}
 
 	@Override
@@ -43,5 +51,4 @@ public class SimpleMove implements Move {
 	public Position getFrom() {
 		return from;
 	}
-
 }

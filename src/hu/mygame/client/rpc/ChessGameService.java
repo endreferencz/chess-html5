@@ -51,7 +51,13 @@ public interface ChessGameService extends RemoteService {
 
 	public boolean move(Long gameId, Move move);
 
+	public void undo(Long gameId);
+
+	public void requestUndo(Long gameId);
+
 	public void startGame();
 
 	public void startGame(Long invitationId);
+
+	void refuseUndo(Long gameId);
 }

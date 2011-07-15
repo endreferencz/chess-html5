@@ -33,4 +33,10 @@ public interface ChessGameServiceAsync {
 
 	void changeName(String name, AsyncCallback<Void> callback);
 
+	void undo(Long gameId, AsyncCallback<Void> callback);
+
+	void requestUndo(Long gameId, AsyncCallback<Void> callback);
+
+	void refuseUndo(Long gameId, AsyncCallback<Void> callback);
+
 }

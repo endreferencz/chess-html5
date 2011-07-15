@@ -3,11 +3,23 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.canvas.client">
 	<ui:style>
 		.important {
-		font-weight: bold;
+			font-weight: bold;
 		}
 	</ui:style>
-	<g:FlowPanel>
-		<c:Canvas ui:field="canvas" />
-		<g:Label ui:field="label" />
-	</g:FlowPanel>
+	<g:ScrollPanel>
+		<g:VerticalPanel>
+			<g:Label visible="false" ui:field="undoLabel" />
+			<g:HorizontalPanel>
+				<g:Button visible="false" text="Accept" ui:field="undoAcceptButton" />
+				<g:Button visible="false" text="Refuse" ui:field="undoRefuseButton" />
+			</g:HorizontalPanel>
+			<g:HorizontalPanel>
+				<c:Canvas ui:field="canvas" />
+				<g:VerticalPanel>
+					<g:Button width="100px" visible="false" text="Undo" ui:field="undoButton" />
+				</g:VerticalPanel>
+			</g:HorizontalPanel>
+			<g:Label ui:field="label" />
+		</g:VerticalPanel>
+	</g:ScrollPanel>
 </ui:UiBinder> 

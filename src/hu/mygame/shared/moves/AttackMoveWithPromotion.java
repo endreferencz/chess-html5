@@ -13,6 +13,9 @@ import hu.mygame.shared.pieces.Rook;
 public class AttackMoveWithPromotion extends SimpleMoveWithPromotion {
 	private static final long serialVersionUID = 1L;
 
+	Piece removedPiece = null;
+	Piece promotedPiece = null;
+
 	public AttackMoveWithPromotion() {
 
 	}
@@ -23,9 +26,14 @@ public class AttackMoveWithPromotion extends SimpleMoveWithPromotion {
 	@Override
 	public void makeMove(Board board) {
 		Piece piece = board.getPiece(from);
+		makeMoved(piece, board);
+		promotedPiece = piece;
 		board.remove(piece);
+
 		Piece attackedPiece = board.getPiece(to);
+		removedPiece = attackedPiece;
 		board.remove(attackedPiece);
+
 		Piece newPiece = null;
 		switch (promotionPiece) {
 			case QUEEN :
@@ -42,6 +50,19 @@ public class AttackMoveWithPromotion extends SimpleMoveWithPromotion {
 				break;
 		}
 		board.add(newPiece);
+	}
+
+	@Override
+	public void undoMove(Board board) {
+		Piece piece = board.getPiece(to);
+		board.remove(piece);
+
+		promotedPiece.setPosition(from);
+		undoMakeMoved(promotedPiece);
+		board.add(promotedPiece);
+
+		removedPiece.setPosition(to);
+		board.add(removedPiece);
 	}
 
 	@Override

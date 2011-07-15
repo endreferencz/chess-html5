@@ -11,6 +11,7 @@ import hu.mygame.shared.pieces.Rook;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Board implements Serializable {
@@ -18,13 +19,19 @@ public class Board implements Serializable {
 
 	private String whitePlayer = null;
 	private String blackPlayer = null;
-	protected ArrayList<Piece> pieces = new ArrayList<Piece>();
-	protected Piece redoPiece = null;
-	protected Position redoPosition = new Position();
-	protected Piece savedPiece = null;
-	protected Side side = Side.WHITE;
-	protected State state = State.WHITE_TURN;
-	protected int step = 0;
+	private ArrayList<Piece> pieces = new ArrayList<Piece>();
+	private Piece redoPiece = null;
+	private Position redoPosition = new Position();
+	private Piece savedPiece = null;
+	private Side side = Side.WHITE;
+	private State state = State.WHITE_TURN;
+	private int step = 0;
+	private LinkedList<Move> moveHistory = new LinkedList<Move>();
+	private LinkedList<State> stateHistory = new LinkedList<State>();
+
+	public LinkedList<Move> getMoveHistory() {
+		return moveHistory;
+	}
 
 	public Board() {
 	}
@@ -134,6 +141,10 @@ public class Board implements Serializable {
 		return state;
 	}
 
+	public void setState(State state) {
+		this.state = state;
+	}
+
 	public int getStep() {
 		return step;
 	}
@@ -197,6 +208,19 @@ public class Board implements Serializable {
 		return true;
 	}
 
+	public void undoLastMove() {
+		if (state == State.WHITE_REQUESTED_UNDO || state == State.BLACK_REQUESTED_UNDO) {
+			stateHistory.removeLast();
+			if (!moveHistory.isEmpty()) {
+				moveHistory.getLast().undoMove(this);
+				moveHistory.removeLast();
+				state = stateHistory.getLast();
+				stateHistory.removeLast();
+				step--;
+			}
+		}
+	}
+
 	public void movePiece(Move move) {
 		// TODO ELLENORZES
 
@@ -204,21 +228,23 @@ public class Board implements Serializable {
 
 		if (piece.isWhite()) {
 			if (state == State.WHITE_TURN || state == State.WHITE_TURN_CHESS) {
+				stateHistory.add(state);
 				state = State.BLACK_TURN;
 			} else {
 				return;
 			}
 		} else {
 			if (state == State.BLACK_TURN || state == State.BLACK_TURN_CHESS) {
+				stateHistory.add(state);
 				state = State.WHITE_TURN;
 			} else {
 				return;
 			}
 		}
 
-		piece.makeMoved(step);
-		step++;
 		move.makeMove(this);
+		moveHistory.add(move);
+		step++;
 
 		Boolean white;
 		if (state == State.BLACK_TURN) {
@@ -333,5 +359,24 @@ public class Board implements Serializable {
 
 	public String getBlackPlayer() {
 		return blackPlayer;
+	}
+
+	public void requestUndo(Side side) {
+		if (step > 0 && state != State.WHITE_REQUESTED_UNDO && state != State.BLACK_REQUESTED_UNDO) {
+			if (side == Side.WHITE) {
+				stateHistory.add(state);
+				state = State.WHITE_REQUESTED_UNDO;
+			} else {
+				stateHistory.add(state);
+				state = State.BLACK_REQUESTED_UNDO;
+			}
+		}
+	}
+
+	public void refuseUndo() {
+		if (state == State.WHITE_REQUESTED_UNDO || state == State.BLACK_REQUESTED_UNDO) {
+			state = stateHistory.getLast();
+			stateHistory.removeLast();
+		}
 	}
 }

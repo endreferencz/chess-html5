@@ -12,7 +12,6 @@
 		}
 	</ui:style>
 	<ui:with field='res' type='hu.mygame.client.resources.Resources' />
-
 	<g:DockLayoutPanel addStyleNames="{style.backg}"
 		unit="PX">
 		<g:north size="200">
@@ -20,9 +19,6 @@
 		</g:north>
 		<g:west size="200">
 			<g:VerticalPanel ui:field="verticalPanel">
-				<g:Button text="New Game" ui:field="startButton" width="200px" />
-				<g:Label addStyleNames="{style.important}" ui:field="statusLabel"
-					text="" />
 				<m:PlayersPanel ui:field="playersPanel" />
 			</g:VerticalPanel>
 		</g:west>
@@ -37,5 +33,8 @@
 				</g:tab>
 			</g:TabLayoutPanel>
 		</g:center>
+		<g:south size="20">
+			<g:Label>Under development. Created by Endre Ferencz (2011)</g:Label>
+		</g:south>
 	</g:DockLayoutPanel>
 </ui:UiBinder> 

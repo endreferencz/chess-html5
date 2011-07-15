@@ -290,4 +290,58 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 			pm.close();
 		}
 	}
+
+	@Override
+	public void undo(Long gameId) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			game.getBoard().undoLastMove();
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+
+		ChannelMessage message;
+		message = new ChannelMessage(game.getBlackUser(), ChessGameService.REFRESH_BOARD + game.getId());
+		channelService.sendMessage(message);
+		message = new ChannelMessage(game.getWhiteUser(), ChessGameService.REFRESH_BOARD + game.getId());
+		channelService.sendMessage(message);
+	}
+
+	@Override
+	public void requestUndo(Long gameId) {
+		User user = userService.getCurrentUser();
+
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			if (user.getUserId().equals(game.getWhiteUser())) {
+				game.getBoard().requestUndo(Side.WHITE);
+			} else {
+				game.getBoard().requestUndo(Side.BLACK);
+			}
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+
+		game.notifyPlayers(channelService);
+	}
+
+	@Override
+	public void refuseUndo(Long gameId) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			game.getBoard().refuseUndo();
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+		game.notifyPlayers(channelService);
+	}
 }
