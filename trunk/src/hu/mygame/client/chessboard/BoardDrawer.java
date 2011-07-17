@@ -86,7 +86,8 @@ public class BoardDrawer {
 
 	public void hideIfUndo(Board board) {
 		context.save();
-		if (board.getState() == State.WHITE_REQUESTED_UNDO || board.getState() == State.BLACK_REQUESTED_UNDO) {
+		if (board.getState() == State.WHITE_REQUESTED_UNDO || board.getState() == State.BLACK_REQUESTED_UNDO
+				|| board.getState() == State.WHITE_REQUESTED_DRAW || board.getState() == State.BLACK_REQUESTED_DRAW) {
 			context.setFillStyle(greyColor);
 			context.fillRect(0, 0, context.getCanvas().getWidth(), context.getCanvas().getHeight());
 		}

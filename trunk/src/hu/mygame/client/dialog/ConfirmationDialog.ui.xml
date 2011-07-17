@@ -1,0 +1,14 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	<g:DialogBox ui:field="dialog" text="Confirm" modal="true" glassEnabled="true"
+		autoHideEnabled="false" title="">
+		<g:VerticalPanel>
+			<g:Label ui:field="label" text="Are you sure?" />
+			<g:HorizontalPanel>
+				<g:Button ui:field="acceptButton" text="Yes" />
+				<g:Button ui:field="refuseButton" text="Cancel" />
+			</g:HorizontalPanel>
+		</g:VerticalPanel>
+	</g:DialogBox>
+</ui:UiBinder> 

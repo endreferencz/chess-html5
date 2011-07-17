@@ -60,4 +60,12 @@ public interface ChessGameService extends RemoteService {
 	public void startGame(Long invitationId);
 
 	void refuseUndo(Long gameId);
+	
+	void refuseDraw(Long gameId);
+
+	void resign(Long gameId);
+
+	void requestDraw(Long gameId);
+
+	void draw(Long gameId);
 }

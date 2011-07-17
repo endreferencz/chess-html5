@@ -39,4 +39,12 @@ public interface ChessGameServiceAsync {
 
 	void refuseUndo(Long gameId, AsyncCallback<Void> callback);
 
+	void resign(Long gameId, AsyncCallback<Void> callback);
+
+	void requestDraw(Long gameId, AsyncCallback<Void> callback);
+
+	void refuseDraw(Long gameId, AsyncCallback<Void> callback);
+
+	void draw(Long gameId, AsyncCallback<Void> callback);
+
 }

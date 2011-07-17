@@ -48,7 +48,7 @@ public class PlayersPanel extends Composite implements AsyncCallback<List<Player
 			} else {
 				add(new Image("icons.png", 60, 80, 20, 20)); 
 			}
-			Label label = new Label(player.getEmail());
+			Label label = new Label(player.getDisplayName());
 			label.setWidth("200px");
 			label.getElement().addClassName(style.player());
 			add(label);

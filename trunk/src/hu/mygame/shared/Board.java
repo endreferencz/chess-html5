@@ -379,4 +379,29 @@ public class Board implements Serializable {
 			stateHistory.removeLast();
 		}
 	}
+
+	public void requestDraw(Side side) {
+		if (state != State.WHITE_REQUESTED_DRAW && state != State.BLACK_REQUESTED_DRAW) {
+			if (side == Side.WHITE) {
+				stateHistory.add(state);
+				state = State.WHITE_REQUESTED_DRAW;
+			} else {
+				stateHistory.add(state);
+				state = State.BLACK_REQUESTED_DRAW;
+			}
+		}
+	}
+
+	public void refuseDraw() {
+		if (state == State.WHITE_REQUESTED_DRAW || state == State.BLACK_REQUESTED_DRAW) {
+			state = stateHistory.getLast();
+			stateHistory.removeLast();
+		}
+	}
+
+	public void draw() {
+		if (state == State.WHITE_REQUESTED_DRAW || state == State.BLACK_REQUESTED_DRAW) {
+			state = State.DRAW;
+		}
+	}
 }
