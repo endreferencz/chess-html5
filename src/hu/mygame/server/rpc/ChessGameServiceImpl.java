@@ -199,27 +199,7 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		try {
 			game = pm.getObjectById(Game.class, gameId);
 			game.getBoard().movePiece(move);
-			if (game.getBoard().getState() == State.WHITE_WIN) {
-				Player player1 = pm.getObjectById(Player.class, game.getWhiteUser());
-				player1.setWin(player1.getWin() + 1);
-				Player player2 = pm.getObjectById(Player.class, game.getBlackUser());
-				player2.setLost(player2.getLost() + 1);
-				game.setFinished(true);
-			}
-			if (game.getBoard().getState() == State.BLACK_WIN) {
-				Player player1 = pm.getObjectById(Player.class, game.getBlackUser());
-				player1.setWin(player1.getWin() + 1);
-				Player player2 = pm.getObjectById(Player.class, game.getWhiteUser());
-				player2.setLost(player2.getLost() + 1);
-				game.setFinished(true);
-			}
-			if (game.getBoard().getState() == State.DRAW) {
-				Player player1 = pm.getObjectById(Player.class, game.getWhiteUser());
-				player1.setDraw(player1.getDraw() + 1);
-				Player player2 = pm.getObjectById(Player.class, game.getBlackUser());
-				player2.setDraw(player2.getDraw() + 1);
-				game.setFinished(true);
-			}
+			manageScore(game, pm);
 			JDOHelper.makeDirty(game, "board");
 			ret = true;
 		} finally {
@@ -235,6 +215,30 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		}
 		channelService.sendMessage(message);
 		return ret;
+	}
+
+	private void manageScore(Game game, PersistenceManager pm) {
+		if (game.getBoard().getState() == State.WHITE_WIN) {
+			Player player1 = pm.getObjectById(Player.class, game.getWhiteUser());
+			player1.setWin(player1.getWin() + 1);
+			Player player2 = pm.getObjectById(Player.class, game.getBlackUser());
+			player2.setLost(player2.getLost() + 1);
+			game.setFinished(true);
+		}
+		if (game.getBoard().getState() == State.BLACK_WIN) {
+			Player player1 = pm.getObjectById(Player.class, game.getBlackUser());
+			player1.setWin(player1.getWin() + 1);
+			Player player2 = pm.getObjectById(Player.class, game.getWhiteUser());
+			player2.setLost(player2.getLost() + 1);
+			game.setFinished(true);
+		}
+		if (game.getBoard().getState() == State.DRAW) {
+			Player player1 = pm.getObjectById(Player.class, game.getWhiteUser());
+			player1.setDraw(player1.getDraw() + 1);
+			Player player2 = pm.getObjectById(Player.class, game.getBlackUser());
+			player2.setDraw(player2.getDraw() + 1);
+			game.setFinished(true);
+		}
 	}
 
 	@Override
@@ -338,6 +342,76 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		try {
 			game = pm.getObjectById(Game.class, gameId);
 			game.getBoard().refuseUndo();
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+		game.notifyPlayers(channelService);
+	}
+
+	@Override
+	public void resign(Long gameId) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		User user = userService.getCurrentUser();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			if (user.getUserId().equals(game.getWhiteUser())) {
+				game.getBoard().setState(State.BLACK_WIN);
+			} else {
+				game.getBoard().setState(State.WHITE_WIN);
+			}
+			manageScore(game, pm);
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+		game.notifyPlayers(channelService);
+	}
+
+	@Override
+	public void requestDraw(Long gameId) {
+		User user = userService.getCurrentUser();
+
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			if (user.getUserId().equals(game.getWhiteUser())) {
+				game.getBoard().requestDraw(Side.WHITE);
+			} else {
+				game.getBoard().requestDraw(Side.BLACK);
+			}
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+
+		game.notifyPlayers(channelService);
+	}
+
+	@Override
+	public void refuseDraw(Long gameId) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			game.getBoard().refuseDraw();
+			JDOHelper.makeDirty(game, "board");
+		} finally {
+			pm.close();
+		}
+		game.notifyPlayers(channelService);
+	}
+
+	@Override
+	public void draw(Long gameId) {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game = null;
+		try {
+			game = pm.getObjectById(Game.class, gameId);
+			game.getBoard().draw();
+			manageScore(game, pm);
 			JDOHelper.makeDirty(game, "board");
 		} finally {
 			pm.close();

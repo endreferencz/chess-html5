@@ -43,11 +43,7 @@ public class PlayerHoverPopupPanel extends PopupPanel implements AsyncCallback<V
 		setWidget(uiBinder.createAndBindUi(this));
 		setAutoHideEnabled(true);
 		this.player = player;
-		if (player.getName() != null) {
-			playerName.setText(player.getName());
-		} else {
-			playerName.setText(player.getEmail());
-		}
+		playerName.setText(player.getEmail());
 		if (player.isInvited()) {
 			invitationState.setText("invited");
 		} else {

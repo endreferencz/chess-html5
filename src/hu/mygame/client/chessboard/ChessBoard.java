@@ -1,6 +1,8 @@
 package hu.mygame.client.chessboard;
 
 import hu.mygame.client.dialog.CanvasNotSupportedDialog;
+import hu.mygame.client.dialog.ConfirmationCallback;
+import hu.mygame.client.dialog.ConfirmationDialog;
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.client.rpc.ChessGameServiceAsync;
 import hu.mygame.shared.Board;
@@ -23,7 +25,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ChessBoard extends Composite implements AsyncCallback<Void> {
+public class ChessBoard extends Composite implements AsyncCallback<Void>, ConfirmationCallback {
 
 	interface ChessUiBinder extends UiBinder<Widget, ChessBoard> {
 	}
@@ -43,6 +45,9 @@ public class ChessBoard extends Composite implements AsyncCallback<Void> {
 
 	@UiField
 	Label undoLabel;
+	
+	@UiField
+	Label drawLabel;
 
 	@UiField
 	Button undoButton;
@@ -52,6 +57,29 @@ public class ChessBoard extends Composite implements AsyncCallback<Void> {
 
 	@UiField
 	Button undoRefuseButton;
+	
+	@UiField
+	Button drawAcceptButton;
+
+	@UiField
+	Button drawRefuseButton;
+
+
+	@UiField
+	Button resignButton;
+
+	@UiField
+	Button drawButton;
+
+	@UiHandler("resignButton")
+	void resign(ClickEvent e) {
+		new ConfirmationDialog(this);
+	}
+
+	@UiHandler("drawButton")
+	void requestDraw(ClickEvent e) {
+		chessGameService.requestDraw(gameId, this);
+	}
 
 	@UiHandler("undoButton")
 	void undo(ClickEvent e) {
@@ -71,6 +99,20 @@ public class ChessBoard extends Composite implements AsyncCallback<Void> {
 		chessGameService.refuseUndo(gameId, this);
 		undoAcceptButton.setEnabled(false);
 		undoRefuseButton.setEnabled(false);
+	}
+	
+	@UiHandler("drawAcceptButton")
+	void drawAccept(ClickEvent e) {
+		chessGameService.draw(gameId, this);
+		drawAcceptButton.setEnabled(false);
+		drawRefuseButton.setEnabled(false);
+	}
+
+	@UiHandler("drawRefuseButton")
+	void drawRefuse(ClickEvent e) {
+		chessGameService.refuseDraw(gameId, this);
+		drawAcceptButton.setEnabled(false);
+		drawRefuseButton.setEnabled(false);
 	}
 
 	public ChessBoard(Long gameId, Board board) {
@@ -128,7 +170,7 @@ public class ChessBoard extends Composite implements AsyncCallback<Void> {
 			undoAcceptButton.setVisible(true);
 			undoRefuseButton.setVisible(true);
 		} else if (board.getSide() == Side.WHITE && board.getState() == State.BLACK_REQUESTED_UNDO) {
-			undoLabel.setText("White player requested undo. Do you accept?");
+			undoLabel.setText("Black player requested undo. Do you accept?");
 			undoLabel.setVisible(true);
 			undoAcceptButton.setEnabled(true);
 			undoRefuseButton.setEnabled(true);
@@ -138,6 +180,34 @@ public class ChessBoard extends Composite implements AsyncCallback<Void> {
 			undoLabel.setVisible(false);
 			undoAcceptButton.setVisible(false);
 			undoRefuseButton.setVisible(false);
+		}
+
+		if (board.getSide() == Side.BLACK && board.getState() == State.WHITE_REQUESTED_DRAW) {
+			drawLabel.setText("White player offered DRAW. Do you accept?");
+			drawLabel.setVisible(true);
+			drawAcceptButton.setEnabled(true);
+			drawRefuseButton.setEnabled(true);
+			drawAcceptButton.setVisible(true);
+			drawRefuseButton.setVisible(true);
+		} else if (board.getSide() == Side.WHITE && board.getState() == State.BLACK_REQUESTED_DRAW) {
+			drawLabel.setText("Black player offered DRAW. Do you accept?");
+			drawLabel.setVisible(true);
+			drawAcceptButton.setEnabled(true);
+			drawRefuseButton.setEnabled(true);
+			drawAcceptButton.setVisible(true);
+			drawRefuseButton.setVisible(true);
+		} else {
+			drawLabel.setVisible(false);
+			drawAcceptButton.setVisible(false);
+			drawRefuseButton.setVisible(false);
+		}
+		
+		if (board.getState() != State.WHITE_WIN && board.getState() != State.BLACK_WIN) {
+			resignButton.setVisible(true);
+			drawButton.setVisible(true);
+		} else {
+			resignButton.setVisible(false);
+			drawButton.setVisible(false);
 		}
 		label.setText(board.getState().toString());
 	}
@@ -155,6 +225,15 @@ public class ChessBoard extends Composite implements AsyncCallback<Void> {
 
 	@Override
 	public void onSuccess(Void result) {
+	}
+
+	@Override
+	public void accept() {
+		chessGameService.resign(gameId, this);
+	}
+
+	@Override
+	public void refuse() {
 	}
 
 }

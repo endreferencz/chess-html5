@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c="urn:import:com.google.gwt.canvas.client">
 	<ui:style>
-		.important {
-			font-weight: bold;
+		.right_button {
+			width: 120px;
 		}
 	</ui:style>
 	<g:ScrollPanel>
@@ -13,10 +13,20 @@
 				<g:Button visible="false" text="Accept" ui:field="undoAcceptButton" />
 				<g:Button visible="false" text="Refuse" ui:field="undoRefuseButton" />
 			</g:HorizontalPanel>
+			<g:Label visible="false" ui:field="drawLabel" />
+			<g:HorizontalPanel>
+				<g:Button visible="false" text="Accept" ui:field="drawAcceptButton" />
+				<g:Button visible="false" text="Refuse" ui:field="drawRefuseButton" />
+			</g:HorizontalPanel>
 			<g:HorizontalPanel>
 				<c:Canvas ui:field="canvas" />
 				<g:VerticalPanel>
-					<g:Button width="100px" visible="false" text="Undo" ui:field="undoButton" />
+					<g:Button addStyleNames="{style.right_button}" visible="false"
+						text="Request Undo" ui:field="undoButton" />
+					<g:Button addStyleNames="{style.right_button}" visible="false"
+						text="Offer Draw" ui:field="drawButton" />
+					<g:Button addStyleNames="{style.right_button}" visible="false"
+						text="Resign" ui:field="resignButton" />
 				</g:VerticalPanel>
 			</g:HorizontalPanel>
 			<g:Label ui:field="label" />
