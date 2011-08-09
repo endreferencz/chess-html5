@@ -2,7 +2,7 @@ package hu.mygame.client.dialog;
 
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.client.rpc.ChessGameServiceAsync;
-import hu.mygame.shared.jdo.Player;
+import hu.mygame.shared.Player;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -44,11 +44,6 @@ public class PlayerHoverPopupPanel extends PopupPanel implements AsyncCallback<V
 		setAutoHideEnabled(true);
 		this.player = player;
 		playerName.setText(player.getEmail());
-		if (player.isInvited()) {
-			invitationState.setText("invited");
-		} else {
-			invitationState.setText("");
-		}
 		score.setText(player.getWin() + " - " + player.getDraw() + " - " + player.getLost());
 	}
 

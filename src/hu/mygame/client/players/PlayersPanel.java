@@ -4,7 +4,7 @@ import hu.mygame.client.dialog.CurrentPlayerHoverPopupPanel;
 import hu.mygame.client.dialog.PlayerHoverPopupPanel;
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.client.rpc.ChessGameServiceAsync;
-import hu.mygame.shared.jdo.Player;
+import hu.mygame.shared.Player;
 
 import java.util.HashMap;
 import java.util.Iterator;

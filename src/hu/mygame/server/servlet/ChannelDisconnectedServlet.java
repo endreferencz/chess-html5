@@ -2,7 +2,7 @@ package hu.mygame.server.servlet;
 
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.server.PMF;
-import hu.mygame.shared.jdo.Player;
+import hu.mygame.server.jdo.PlayerJDO;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ChannelDisconnectedServlet extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Player player = pm.getObjectById(Player.class, clientId);
+			PlayerJDO player = pm.getObjectById(PlayerJDO.class, clientId);
 			player.setOnline(false);
 		} finally {
 			pm.close();
@@ -43,10 +43,10 @@ public class ChannelDisconnectedServlet extends HttpServlet {
 
 		pm = PMF.get().getPersistenceManager();
 		try {
-			Query query = pm.newQuery(Player.class);
+			Query query = pm.newQuery(PlayerJDO.class);
 			query.setFilter("online == true");
-			List<Player> players = (List<Player>) query.execute();
-			for (Player p : players) {
+			List<PlayerJDO> players = (List<PlayerJDO>) query.execute();
+			for (PlayerJDO p : players) {
 				ChannelMessage message = new ChannelMessage(p.getUser(), ChessGameService.PLAYER_WENT_OFFLINE
 						+ clientId);
 				channelService.sendMessage(message);

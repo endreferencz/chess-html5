@@ -2,13 +2,14 @@ package hu.mygame.server.rpc;
 
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.server.PMF;
-import hu.mygame.server.jdo.Game;
-import hu.mygame.server.jdo.Invitation;
+import hu.mygame.server.jdo.GameJDO;
+import hu.mygame.server.jdo.InvitationJDO;
+import hu.mygame.server.jdo.PlayerJDO;
 import hu.mygame.shared.Board;
+import hu.mygame.shared.Player;
 import hu.mygame.shared.SharedInvitation;
 import hu.mygame.shared.Side;
 import hu.mygame.shared.State;
-import hu.mygame.shared.jdo.Player;
 import hu.mygame.shared.moves.Move;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		String userId = null;
 		try {
-			Player currentPlayer = getCurrentPlayer(pm);
+			PlayerJDO currentPlayer = getCurrentPlayer(pm);
 			userId = currentPlayer.getUser();
 		} finally {
 			pm.close();
@@ -56,7 +57,7 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public void declineInvitation(Long invitationId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Invitation invitation = pm.getObjectById(Invitation.class, invitationId);
+			InvitationJDO invitation = pm.getObjectById(InvitationJDO.class, invitationId);
 			pm.deletePersistent(invitation);
 		} finally {
 			pm.close();
@@ -67,9 +68,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public Board getBoard(Long gameId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Board board = null;
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			board = game.getBoard();
 		} finally {
 			pm.close();
@@ -84,16 +85,16 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		}
 	}
 
-	private Player getCurrentPlayer(PersistenceManager pm) {
-		Player player = null;
+	private PlayerJDO getCurrentPlayer(PersistenceManager pm) {
+		PlayerJDO player = null;
 		User user = userService.getCurrentUser();
 		try {
-			player = pm.getObjectById(Player.class, user.getUserId());
+			player = pm.getObjectById(PlayerJDO.class, user.getUserId());
 		} catch (Exception e) {
 
 		}
 		if (player == null) {
-			player = new Player(0L, user.getEmail(), false, 0L, null, user.getUserId(), false, false, 0L);
+			player = new PlayerJDO(0L, user.getEmail(), 0L, null, user.getUserId(), false, false, 0L);
 			pm.makePersistent(player);
 		}
 		return player;
@@ -104,13 +105,14 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		List<SharedInvitation> ret = new ArrayList<SharedInvitation>();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Query invitationQuery = pm.newQuery(Invitation.class);
+			Query invitationQuery = pm.newQuery(InvitationJDO.class);
 			invitationQuery.setFilter("target == targetParam");
 			invitationQuery.declareParameters("java.lang.String targetParam");
-			List<Invitation> invitations = (List<Invitation>) invitationQuery.execute(userService.getCurrentUser()
-					.getUserId());
-			for (Invitation i : invitations) {
-				ret.add(new SharedInvitation(i.getId(), pm.getObjectById(Player.class, i.getInitiator())));
+			List<InvitationJDO> invitations = (List<InvitationJDO>) invitationQuery.execute(userService
+					.getCurrentUser().getUserId());
+			for (InvitationJDO i : invitations) {
+				PlayerJDO player = pm.getObjectById(PlayerJDO.class, i.getInitiator());
+				ret.add(new SharedInvitation(i.getId(), player.toPlayer()));
 			}
 		} finally {
 			pm.close();
@@ -123,24 +125,13 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		List<Player> ret = new ArrayList<Player>();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Query query = pm.newQuery(Player.class);
-			List<Player> players = (List<Player>) query.execute();
-			ret = (List<Player>) pm.detachCopyAll(players);
-			Query invitationQuery = pm.newQuery(Invitation.class);
-			invitationQuery.setFilter("initiator == initiatorParam");
-			invitationQuery.declareParameters("java.lang.String initiatorParam");
-			List<Invitation> invitations = (List<Invitation>) invitationQuery.execute(userService.getCurrentUser()
-					.getUserId());
-			Player currentPlayer = getCurrentPlayer(pm);
-			currentPlayer = pm.detachCopy(currentPlayer);
-			ret.remove(currentPlayer);
-			ret.add(0, currentPlayer);
-			// TODO optimize
-			for (Player p : ret) {
-				for (Invitation i : invitations) {
-					if (p.getUser().equals(i.getTarget())) {
-						p.setInvited(true);
-					}
+			PlayerJDO currentPlayer = getCurrentPlayer(pm);
+			Query query = pm.newQuery(PlayerJDO.class);
+			List<PlayerJDO> players = (List<PlayerJDO>) query.execute();
+			ret.add(currentPlayer.toPlayer());
+			for (PlayerJDO p : players) {
+				if (!p.equals(currentPlayer)) {
+					ret.add(p.toPlayer());
 				}
 			}
 		} finally {
@@ -149,10 +140,10 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		return ret;
 	}
 
-	private Player getWaitingPlayer(PersistenceManager pm) {
-		Query query = pm.newQuery(Player.class, "waiting == true");
+	private PlayerJDO getWaitingPlayer(PersistenceManager pm) {
+		Query query = pm.newQuery(PlayerJDO.class, "waiting == true");
 		@SuppressWarnings("unchecked")
-		List<Player> players = (List<Player>) query.execute();
+		List<PlayerJDO> players = (List<PlayerJDO>) query.execute();
 		if (players.size() > 0) {
 			return players.get(0);
 		} else {
@@ -165,10 +156,10 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		ArrayList<String> ret = new ArrayList<String>();
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Query query = pm.newQuery(Player.class, "waiting == true");
+			Query query = pm.newQuery(PlayerJDO.class, "waiting == true");
 			@SuppressWarnings("unchecked")
-			List<Player> players = (List<Player>) query.execute();
-			for (Player p : players) {
+			List<PlayerJDO> players = (List<PlayerJDO>) query.execute();
+			for (PlayerJDO p : players) {
 				ret.add(p.getUser());
 			}
 		} finally {
@@ -180,9 +171,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public void invite(String userId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Player initiator = getCurrentPlayer(pm);
-			Player target = pm.getObjectById(Player.class, userId);
-			Invitation invitation = new Invitation(initiator.getUser(), target.getUser());
+			PlayerJDO initiator = getCurrentPlayer(pm);
+			PlayerJDO target = pm.getObjectById(PlayerJDO.class, userId);
+			InvitationJDO invitation = new InvitationJDO(initiator.getUser(), target.getUser());
 			pm.makePersistent(invitation);
 			ChannelMessage message = new ChannelMessage(userId, ChessGameService.INVITATION);
 			channelService.sendMessage(message);
@@ -195,9 +186,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public boolean move(Long gameId, Move move) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Boolean ret = false;
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			game.getBoard().movePiece(move);
 			manageScore(game, pm);
 			JDOHelper.makeDirty(game, "board");
@@ -217,25 +208,25 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		return ret;
 	}
 
-	private void manageScore(Game game, PersistenceManager pm) {
+	private void manageScore(GameJDO game, PersistenceManager pm) {
 		if (game.getBoard().getState() == State.WHITE_WIN) {
-			Player player1 = pm.getObjectById(Player.class, game.getWhiteUser());
+			PlayerJDO player1 = pm.getObjectById(PlayerJDO.class, game.getWhiteUser());
 			player1.setWin(player1.getWin() + 1);
-			Player player2 = pm.getObjectById(Player.class, game.getBlackUser());
+			PlayerJDO player2 = pm.getObjectById(PlayerJDO.class, game.getBlackUser());
 			player2.setLost(player2.getLost() + 1);
 			game.setFinished(true);
 		}
 		if (game.getBoard().getState() == State.BLACK_WIN) {
-			Player player1 = pm.getObjectById(Player.class, game.getBlackUser());
+			PlayerJDO player1 = pm.getObjectById(PlayerJDO.class, game.getBlackUser());
 			player1.setWin(player1.getWin() + 1);
-			Player player2 = pm.getObjectById(Player.class, game.getWhiteUser());
+			PlayerJDO player2 = pm.getObjectById(PlayerJDO.class, game.getWhiteUser());
 			player2.setLost(player2.getLost() + 1);
 			game.setFinished(true);
 		}
 		if (game.getBoard().getState() == State.DRAW) {
-			Player player1 = pm.getObjectById(Player.class, game.getWhiteUser());
+			PlayerJDO player1 = pm.getObjectById(PlayerJDO.class, game.getWhiteUser());
 			player1.setDraw(player1.getDraw() + 1);
-			Player player2 = pm.getObjectById(Player.class, game.getBlackUser());
+			PlayerJDO player2 = pm.getObjectById(PlayerJDO.class, game.getBlackUser());
 			player2.setDraw(player2.getDraw() + 1);
 			game.setFinished(true);
 		}
@@ -245,14 +236,14 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public void startGame() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Player waitingPlayer = getWaitingPlayer(pm);
-			Player currentPlayer = getCurrentPlayer(pm);
+			PlayerJDO waitingPlayer = getWaitingPlayer(pm);
+			PlayerJDO currentPlayer = getCurrentPlayer(pm);
 			if (waitingPlayer != null && waitingPlayer != currentPlayer) {
 				waitingPlayer.setWaiting(false);
 				Board board = new Board(true);
 				board.setWhitePlayer(waitingPlayer.getUser());
 				board.setBlackPlayer(currentPlayer.getUser());
-				Game game = new Game(waitingPlayer.getUser(), currentPlayer.getUser(), board);
+				GameJDO game = new GameJDO(waitingPlayer.getUser(), currentPlayer.getUser(), board);
 				pm.makePersistent(game);
 				game.notifyPlayers(channelService);
 			} else {
@@ -267,14 +258,14 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public void startGame(Long invitationId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Invitation invitation = pm.getObjectById(Invitation.class, invitationId);
-			Player otherPlayer = pm.getObjectById(Player.class, invitation.getTarget());
-			Player currentPlayer = pm.getObjectById(Player.class, invitation.getInitiator());
+			InvitationJDO invitation = pm.getObjectById(InvitationJDO.class, invitationId);
+			PlayerJDO otherPlayer = pm.getObjectById(PlayerJDO.class, invitation.getTarget());
+			PlayerJDO currentPlayer = pm.getObjectById(PlayerJDO.class, invitation.getInitiator());
 			if (!otherPlayer.getUser().equals(currentPlayer.getUser())) {
 				Board board = new Board(true);
 				board.setWhitePlayer(otherPlayer.getUser());
 				board.setBlackPlayer(currentPlayer.getUser());
-				Game game = new Game(otherPlayer.getUser(), currentPlayer.getUser(), board);
+				GameJDO game = new GameJDO(otherPlayer.getUser(), currentPlayer.getUser(), board);
 				pm.makePersistent(game);
 				game.notifyPlayers(channelService);
 			}
@@ -288,7 +279,7 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public void changeName(String name) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Player currentPlayer = getCurrentPlayer(pm);
+			PlayerJDO currentPlayer = getCurrentPlayer(pm);
 			currentPlayer.setName(name);
 		} finally {
 			pm.close();
@@ -298,9 +289,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	@Override
 	public void undo(Long gameId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			game.getBoard().undoLastMove();
 			JDOHelper.makeDirty(game, "board");
 		} finally {
@@ -319,9 +310,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		User user = userService.getCurrentUser();
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			if (user.getUserId().equals(game.getWhiteUser())) {
 				game.getBoard().requestUndo(Side.WHITE);
 			} else {
@@ -338,9 +329,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	@Override
 	public void refuseUndo(Long gameId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			game.getBoard().refuseUndo();
 			JDOHelper.makeDirty(game, "board");
 		} finally {
@@ -353,9 +344,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	public void resign(Long gameId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		User user = userService.getCurrentUser();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			if (user.getUserId().equals(game.getWhiteUser())) {
 				game.getBoard().setState(State.BLACK_WIN);
 			} else {
@@ -374,9 +365,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 		User user = userService.getCurrentUser();
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			if (user.getUserId().equals(game.getWhiteUser())) {
 				game.getBoard().requestDraw(Side.WHITE);
 			} else {
@@ -393,9 +384,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	@Override
 	public void refuseDraw(Long gameId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			game.getBoard().refuseDraw();
 			JDOHelper.makeDirty(game, "board");
 		} finally {
@@ -407,9 +398,9 @@ public class ChessGameServiceImpl extends RemoteServiceServlet implements ChessG
 	@Override
 	public void draw(Long gameId) {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game = null;
+		GameJDO game = null;
 		try {
-			game = pm.getObjectById(Game.class, gameId);
+			game = pm.getObjectById(GameJDO.class, gameId);
 			game.getBoard().draw();
 			manageScore(game, pm);
 			JDOHelper.makeDirty(game, "board");
