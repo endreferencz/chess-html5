@@ -2,7 +2,7 @@ package hu.mygame.client.dialog;
 
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.client.rpc.ChessGameServiceAsync;
-import hu.mygame.shared.jdo.Player;
+import hu.mygame.shared.Player;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

@@ -2,8 +2,8 @@ package hu.mygame.server.servlet;
 
 import hu.mygame.client.rpc.ChessGameService;
 import hu.mygame.server.PMF;
-import hu.mygame.server.jdo.Game;
-import hu.mygame.shared.jdo.Player;
+import hu.mygame.server.jdo.GameJDO;
+import hu.mygame.server.jdo.PlayerJDO;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +37,7 @@ public class ChannelConnectedServlet extends HttpServlet {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		try {
-			Player player = pm.getObjectById(Player.class, clientId);
+			PlayerJDO player = pm.getObjectById(PlayerJDO.class, clientId);
 			player.setOnline(true);
 		} finally {
 			pm.close();
@@ -45,28 +45,28 @@ public class ChannelConnectedServlet extends HttpServlet {
 
 		pm = PMF.get().getPersistenceManager();
 		try {
-			Query query = pm.newQuery(Game.class);
+			Query query = pm.newQuery(GameJDO.class);
 			query.setFilter("(whiteUser == userParam) && (finished == false)");
 			query.declareParameters("String userParam");
-			List<Game> games = (List<Game>) query.execute(clientId);
-			for (Game g : games) {
+			List<GameJDO> games = (List<GameJDO>) query.execute(clientId);
+			for (GameJDO g : games) {
 				ChannelMessage message = new ChannelMessage(clientId, ChessGameService.REFRESH_BOARD + g.getId());
 				channelService.sendMessage(message);
 			}
 
-			query = pm.newQuery(Game.class);
+			query = pm.newQuery(GameJDO.class);
 			query.setFilter("(blackUser == userParam) && (finished == false)");
 			query.declareParameters("String userParam");
-			games = (List<Game>) query.execute(clientId);
-			for (Game g : games) {
+			games = (List<GameJDO>) query.execute(clientId);
+			for (GameJDO g : games) {
 				ChannelMessage message = new ChannelMessage(clientId, ChessGameService.REFRESH_BOARD + g.getId());
 				channelService.sendMessage(message);
 			}
 
-			query = pm.newQuery(Player.class);
+			query = pm.newQuery(PlayerJDO.class);
 			query.setFilter("online == true");
-			List<Player> players = (List<Player>) query.execute();
-			for (Player p : players) {
+			List<PlayerJDO> players = (List<PlayerJDO>) query.execute();
+			for (PlayerJDO p : players) {
 				ChannelMessage message = new ChannelMessage(p.getUser(), ChessGameService.PLAYER_WENT_ONLINE + clientId);
 				channelService.sendMessage(message);
 			}

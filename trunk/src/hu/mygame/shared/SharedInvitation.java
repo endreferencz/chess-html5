@@ -1,7 +1,5 @@
 package hu.mygame.shared;
 
-import hu.mygame.shared.jdo.Player;
-
 import java.io.Serializable;
 
 public class SharedInvitation implements Serializable {

@@ -2,7 +2,7 @@ package hu.mygame.client.rpc;
 
 import hu.mygame.shared.Board;
 import hu.mygame.shared.SharedInvitation;
-import hu.mygame.shared.jdo.Player;
+import hu.mygame.shared.Player;
 import hu.mygame.shared.moves.Move;
 
 import java.util.List;
